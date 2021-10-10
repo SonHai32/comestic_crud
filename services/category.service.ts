@@ -1,0 +1,107 @@
+import { CategoryResponse } from "./../models/cat-response.model";
+import { Cat } from "./../models/cat.model";
+import { Collection, MongoClient } from "mongodb";
+import { ObjectId } from "bson";
+import { CategoryFilter } from "../models/cat-query.model";
+
+("use strict");
+
+export default class CategoryService {
+  constructor(private categoryCollection: Collection) {}
+
+  static async injectDB(connection: MongoClient) {
+    if (this.prototype.categoryCollection) {
+      return;
+    } else {
+      try {
+        this.prototype.categoryCollection = connection
+          .db(process.env.DB_NAME)
+          .collection("categories");
+      } catch (error) {
+        throw error;
+      }
+    }
+  }
+
+  static async getAllCategory(
+    filter?: CategoryFilter
+  ): Promise<CategoryResponse> {
+    try {
+      const cursor = this.prototype.categoryCollection.find<Cat>({});
+      let categories: Cat[] = [];
+      if (filter?.perPage) {
+        const cursorLimit = cursor
+          .limit(filter.perPage)
+          .skip(filter.page ? filter.page : 0);
+        if (filter.nameSort) {
+          categories = await cursorLimit
+            .sort({ cat_name: filter.nameSort })
+            .toArray();
+        }
+      } else {
+        if (filter?.nameSort) {
+          categories = await cursor
+            .sort({ cat_name: filter.nameSort })
+            .toArray();
+        } else {
+          categories = await cursor.toArray();
+        }
+      }
+      const totalResult =
+        await this.prototype.categoryCollection.countDocuments({});
+      const response: CategoryResponse = {
+        status: categories ? "SUCCESS" : "FAIL",
+        categories: categories ? categories : [],
+        page: filter?.page ? filter.page : 0,
+        perPage: filter?.perPage ? filter.perPage : null,
+        totalResult: totalResult,
+      };
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getCategoryByID(cat_id: string) {
+    try {
+      return await this.prototype.categoryCollection.findOne<Cat>({
+        cat_id,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getCategoryByName(cat_name: string) {
+    try {
+      return await this.prototype.categoryCollection.findOne<Cat>({
+        cat_name,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async insertCategory(category: Cat) {
+    try {
+      return await this.prototype.categoryCollection.insertOne({
+        ...category,
+        _id: new ObjectId(),
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async updateCategory(categoryID: string, category: Cat) {
+    try {
+      return await this.prototype.categoryCollection.updateOne(
+        { _id: new ObjectId(categoryID) },
+        { $set: category },
+        { upsert: false }
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+}
