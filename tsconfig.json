@@ -5,7 +5,6 @@
     "rootDir": "./",
     "outDir": "./build",
     "esModuleInterop": true,
-    "strict": true,
-    "plugins": [{ "transform": "ts-transformer-keys/transformer" }]
+    "strict": true
   }
 }

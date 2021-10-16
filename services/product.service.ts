@@ -2,7 +2,7 @@ import { ProductResponse } from "../models/product-response.model";
 import { Collection, MongoClient } from "mongodb";
 import { ProductListQuery } from "../models/product-query.model";
 import { Product } from "../models/product.model";
-import { Double, ObjectId } from "bson";
+import { Double, Int32, ObjectId, Timestamp } from "bson";
 
 export default class ProductService {
   constructor(private productCollection: Collection) {}
@@ -23,12 +23,33 @@ export default class ProductService {
     }
   }
 
+  static async isProductNameExisted(productName: string, productID?: string) {
+    const product = await this.prototype.productCollection.findOne<Product>({
+      name: productName,
+    });
+    if (product && productID) {
+      return product._id?.toString() !== productID;
+    } else if (product) {
+      return true;
+    } else return false;
+  }
+  static async isSlugExisted(slug: string, productID?: string) {
+    const product = await this.prototype.productCollection.findOne<Product>({
+      slug,
+    });
+    if (product && productID) {
+      return product._id !== productID;
+    } else if (product) {
+      return true;
+    } else return false;
+  }
+
   static async getProductDetail(productID: string): Promise<Product | null> {
     return await this.prototype.productCollection.findOne<Product>({
       _id: new ObjectId(productID),
     });
   }
-  
+
   static async getProduct(query: ProductListQuery) {
     let _query = [];
     if (query.name) {
@@ -41,7 +62,14 @@ export default class ProductService {
     }
     if (query.price) {
       _query.push({
-        product_price: { $gte: query.price[0], $lte: query.price[1] },
+        $or: [
+          {
+            sell_price: { $gte: query.price[0], $lte: query.price[1] },
+          },
+          {
+            display_price: { $gte: query.price[0], $lte: query.price[1] },
+          },
+        ],
       });
     }
     try {
@@ -66,31 +94,55 @@ export default class ProductService {
     }
   }
 
-  static async InsertProduct(product: Product) {
+  static async InsertProduct(user: any, product: any) {
     const {
-      product_amount,
-      product_discount,
-      product_old_price,
-      product_price,
-      product_rating,
+      display_price,
+      original_price,
+      sell_price,
+      profit,
+      quantity,
+      rating,
+      discount,
     } = product;
     const productPropMaptoBson = {
       ...product,
-      product_amount: new Double(product_amount),
-      product_discount: new Double(product_discount),
-      product_old_price: new Double(product_old_price),
-      product_price: new Double(product_price),
-      product_rating: new Double(product_rating),
+      created_at: Timestamp.fromInt(Date.now()),
+      quantity: new Int32(quantity),
+      rating: new Double(rating),
+      discount: new Double(discount),
+      display_price: new Double(display_price),
+      original_price: new Double(original_price),
+      sell_price: new Double(sell_price),
+      profit: new Double(profit),
+      last_modify: {
+        updated_at: Timestamp.fromInt(Date.now()),
+        updated_by_id: user._id,
+        updated_by_username: user.username,
+      },
+      created_detail: {
+        created_at: new Date(),
+        created_by_id: user._id,
+        created_by_username: user.username,
+      },
+    } as Product;
+    return await this.prototype.productCollection.insertOne({
+      ...productPropMaptoBson,
       _id: new ObjectId(),
-    };
-    return await this.prototype.productCollection.insertOne(
-      productPropMaptoBson
-    );
+    });
   }
-  static async UpdateProduct(product: Product, ID: string) {
+  static async UpdateProduct(product: Product, ID: string, accessToken: any) {
     return await this.prototype.productCollection.updateOne(
       { _id: new ObjectId(ID) },
-      { $set: product },
+      {
+        $set: {
+          ...product,
+          last_modify: {
+            updated_at: new Date(),
+            updated_by_id: accessToken._id,
+            updated_by_username: accessToken.username,
+          },
+        } as Product,
+      },
       { upsert: false }
     );
   }

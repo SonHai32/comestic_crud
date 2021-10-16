@@ -1,8 +1,8 @@
-import { CategoryResponse } from "./../models/cat-response.model";
-import { Cat } from "./../models/cat.model";
-import { Collection, MongoClient } from "mongodb";
+import { CategoryResponse } from "../models/category-response.model";
+import { Category } from "../models/category.model";
+import { Collection, DeleteResult, MongoClient } from "mongodb";
 import { ObjectId } from "bson";
-import { CategoryFilter } from "../models/cat-query.model";
+import { CategoryFilter } from "../models/category-filter.model";
 
 ("use strict");
 
@@ -27,8 +27,8 @@ export default class CategoryService {
     filter?: CategoryFilter
   ): Promise<CategoryResponse> {
     try {
-      const cursor = this.prototype.categoryCollection.find<Cat>({});
-      let categories: Cat[] = [];
+      const cursor = this.prototype.categoryCollection.find<Category>({});
+      let categories: Category[] = [];
       if (filter?.perPage) {
         const cursorLimit = cursor
           .limit(filter.perPage)
@@ -62,10 +62,10 @@ export default class CategoryService {
     }
   }
 
-  static async getCategoryByID(cat_id: string) {
+  static async getCategoryByID(slug: string) {
     try {
-      return await this.prototype.categoryCollection.findOne<Cat>({
-        cat_id,
+      return await this.prototype.categoryCollection.findOne<Category>({
+        slug,
       });
     } catch (error) {
       throw error;
@@ -74,7 +74,7 @@ export default class CategoryService {
 
   static async getCategoryByName(cat_name: string) {
     try {
-      return await this.prototype.categoryCollection.findOne<Cat>({
+      return await this.prototype.categoryCollection.findOne<Category>({
         cat_name,
       });
     } catch (error) {
@@ -82,7 +82,26 @@ export default class CategoryService {
     }
   }
 
-  static async insertCategory(category: Cat) {
+  static async isSlugExisted(slug: string) {
+    try {
+      return await this.prototype.categoryCollection.findOne<Category>({
+        slug,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+  static async isNameExisted(name: string) {
+    try {
+      return await this.prototype.categoryCollection.findOne<Category>({
+        name,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async insertCategory(category: Category) {
     try {
       return await this.prototype.categoryCollection.insertOne({
         ...category,
@@ -93,13 +112,24 @@ export default class CategoryService {
     }
   }
 
-  static async updateCategory(categoryID: string, category: Cat) {
+  static async updateCategory(categoryID: string, category: Category) {
     try {
       return await this.prototype.categoryCollection.updateOne(
         { _id: new ObjectId(categoryID) },
         { $set: category },
         { upsert: false }
       );
+    } catch (error) {
+      throw error;
+    }
+  }
+  static async deleteCategory(
+    listID: string[]
+  ): Promise<DeleteResult | undefined> {
+    try {
+      return await this.prototype.categoryCollection.deleteMany({
+        _id: { $in: listID },
+      });
     } catch (error) {
       throw error;
     }

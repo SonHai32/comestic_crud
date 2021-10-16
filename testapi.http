@@ -15,15 +15,27 @@ POST http://localhost:8080/api/users/login
 Content-Type: application/json
 
 {
-    "userAuth": {
-        "username": "haihihi1",
+     
+        "username": "haihihi",
         "password": "hhsh0302"
-    }
+    
 }
 
 
 ###
 
 GET http://localhost:8080/api/categories
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTYzMzJlNjExMjllNmM5NWQ2NTQ3NWEiLCJ1c2VybmFtZSI6ImhhaWhpaGkxIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE2MzM4OTEwNTYsImV4cCI6MTYzMzkwOTA1Nn0.k8VVO9GXLY4KoOFAjx9y9wy_21aPJ2fVmoDeMltYtb0 
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTYzMmI3YjRlMjNkMGE4OTAwNjU0NDMiLCJ1c2VybmFtZSI6ImhhaWhpaGkiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE2MzQwMTk5MjYsImV4cCI6MTYzNDAzNzkyNn0.sHLwWFr1Sw1h9-Zw4jKVeUfwEFD9wJF17nDedBDI4k0 
 ###
+
+POST http://localhost:8080/api/categories
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTYzMmI3YjRlMjNkMGE4OTAwNjU0NDMiLCJ1c2VybmFtZSI6ImhhaWhpaGkiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE2MzQwMTk5MjYsImV4cCI6MTYzNDAzNzkyNn0.sHLwWFr1Sw1h9-Zw4jKVeUfwEFD9wJF17nDedBDI4k0 
+Content-Type: application/json
+
+{
+    "category": {
+
+    "name": "hihi",
+    "slug": "hihi"
+    }
+}

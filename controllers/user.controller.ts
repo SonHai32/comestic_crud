@@ -1,23 +1,43 @@
+import { TokenService } from "./../services/token.service";
+import jwt from "jsonwebtoken";
 import { Timestamp } from "bson";
 import { User } from "./../models/user.model";
 import { Response, Request } from "express";
 import UserService from "../services/user.service";
 
-("use strict");
-
-export const _login = async (req: Request, res: Response) => {
+export const _Login = async (req: Request, res: Response) => {
   try {
-    const userAuth: any = req.body.userAuth;
-    if (!userAuth) throw new Error("Missing user authentication");
-    else if (!userAuth.username) throw new Error("Missing username");
-    else if (!userAuth.password) throw new Error("Missing password");
+    const username: any = req.body.username;
+    const password: any = req.body.password;
+    if (!username && !password) throw new Error("Missing user authentication");
+    else if (!username) throw new Error("Missing username");
+    else if (!password) throw new Error("Missing password");
 
-    const accessToken = await UserService.authentication(
-      userAuth.username,
-      userAuth.password
+    const accessToken: any = await UserService.authentication(
+      username,
+      password
     );
     if (accessToken) {
-      res.json(accessToken);
+      // res.cookie("token", accessToken.token, {
+      //   httpOnly: true,
+      //   secure: true,
+      //   expires: new Date(new Date().getTime() + 10 * 1000),
+      //   sameSite: "strict",
+      // });
+      res.cookie("refreshToken", accessToken.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        expires: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
+        sameSite: "strict",
+      });
+      res.header("Access-Control-Allow-Origin", "http://localhost:4200");
+      res.header("Access-Control-Allow-Headers", "X-Requested-With");
+      res.status(200).json({
+        token: {
+          accessToken,
+          expiresIn: new Date(new Date().getTime() + 20 * 1000),
+        },
+      });
     } else throw new Error("Error while genarate access token");
   } catch (error) {
     res.json({
@@ -27,7 +47,7 @@ export const _login = async (req: Request, res: Response) => {
   }
 };
 
-export const _register = async (req: Request, res: Response) => {
+export const _Register = async (req: Request, res: Response) => {
   try {
     const userReq = req.body.user;
     if (!userReq) throw new Error("Missing user");
@@ -57,4 +77,40 @@ export const _register = async (req: Request, res: Response) => {
       message: (error as Error).message,
     });
   }
+};
+
+export const _RefreshToken = async (req: Request, res: Response) => {
+  try {
+    const { refreshToken } = req.cookies;
+    if (!refreshToken) return res.sendStatus(401);
+    const refreshTokenInvalid = await TokenService.checkRefreshToken(
+      refreshToken
+    );
+    if (!refreshTokenInvalid) return res.sendStatus(401);
+    if (process.env.JWT_RETOKEN_SECRET_KEY) {
+      jwt.verify(
+        refreshToken,
+        process.env.JWT_RETOKEN_SECRET_KEY,
+        (error: any, data: any) => {
+          if (error) return res.sendStatus(401);
+          if (!data) return res.sendStatus(401);
+          if (process.env.JWT_SECRET_KEY) {
+            const accessToken = jwt.sign(
+              data.user,
+              process.env.JWT_SECRET_KEY,
+              {
+                expiresIn: "20s",
+              }
+            );
+            return res.status(200).json({
+              token: {
+                accessToken,
+                expiresIn: new Date(new Date().getTime() + 20 * 1000),
+              },
+            });
+          } else return res.sendStatus(401);
+        }
+      );
+    }
+  } catch (error) {}
 };

@@ -1,8 +1,8 @@
-import { Cat } from "./cat.model";
+import { Category } from "./category.model";
 
 export interface CategoryResponse {
   status: "SUCCESS" | "FAIL";
-  categories: Cat[];
+  categories: Category[];
   totalResult: number;
   page: number | null;
   perPage: number | null;

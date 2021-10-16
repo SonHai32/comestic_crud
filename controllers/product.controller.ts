@@ -4,9 +4,7 @@ import { Request, Response } from "express";
 import ProductService from "../services/product.service";
 import { InsertOneResult } from "mongodb";
 
-("use strict");
-
-export const _get = async (req: Request, res: Response) => {
+export const _Get = async (req: Request, res: Response) => {
   try {
     const query: ProductListQuery = {
       name: req.body.name || req.query.name,
@@ -49,7 +47,7 @@ export const _get = async (req: Request, res: Response) => {
     });
   }
 };
-export const _detail = async (req: Request, res: Response) => {
+export const _Detail = async (req: Request, res: Response) => {
   if (req.query.id) {
     try {
       const product: Product | null = await ProductService.getProductDetail(
@@ -71,13 +69,13 @@ export const _detail = async (req: Request, res: Response) => {
     }
   }
 };
-export const _create = async (req: Request, res: Response) => {
+export const _Create = async (req: Request, res: Response) => {
   try {
-    const request: any = req.body || req.query;
-    const invalid = productValid(request);
-    if (!invalid) {
+    const product: Product = req.body.product;
+    const accessToken = req.body.accessToken;
+    if (accessToken) {
       const result: InsertOneResult<Product> =
-        await ProductService.InsertProduct(request as Product);
+        await ProductService.InsertProduct(accessToken, product);
       if (result.insertedId) {
         res.json({
           status: "SUCCESS",
@@ -86,42 +84,35 @@ export const _create = async (req: Request, res: Response) => {
       } else {
         throw new Error("ERROR WITH INSERT");
       }
-    } else {
-      throw new Error(`Missing Query: ${invalid}`);
-    }
+    } else throw new Error("Missing access token");
   } catch (error) {
     res.json({ status: "FAIL", message: (error as Error).message });
   }
 };
-export const _update = async (req: Request, res: Response) => {
+export const _Update = async (req: Request, res: Response) => {
   try {
-    const request: any = req.body || req.query;
-    if (request) {
-      const invalid = productValid(request);
-      if (!invalid) {
-        if (request._id) {
-          const ID = request._id;
-          delete request["_id"];
-          const result = await ProductService.UpdateProduct(
-            request as Product,
-            ID
-          );
-          if (result.matchedCount) {
-            res.json({
-              status: "SUCCESS",
-              message: `UPDATE product with ID ${result.upsertedId}`,
-            });
-          } else {
-            throw new Error("Update Fail");
-          }
+    const product: Product = req.body.product;
+    const accessToken: any = req.body.accessToken;
+    if (product) {
+      if (product._id) {
+        const ID = product._id;
+        delete product["_id"];
+        const result = await ProductService.UpdateProduct(
+          product,
+          ID,
+          accessToken
+        );
+        if (result.matchedCount) {
+          res.json({
+            status: "SUCCESS",
+            message: `UPDATE product with ID ${result.upsertedId}`,
+          });
         } else {
-          throw new Error(`Missing ID`);
+          throw new Error("Update Fail");
         }
       } else {
-        throw new Error(`Missing query ${invalid}`);
+        throw new Error(`Missing ID`);
       }
-    } else {
-      throw new Error("Missing request body ");
     }
   } catch (error) {
     res.json({
@@ -130,7 +121,7 @@ export const _update = async (req: Request, res: Response) => {
     });
   }
 };
-export const _delete = async (req: Request, res: Response) => {
+export const _Delete = async (req: Request, res: Response) => {
   try {
     const productID = req.query.id || req.body.id || req.params.id;
     if (productID) {
@@ -153,7 +144,7 @@ export const _delete = async (req: Request, res: Response) => {
     });
   }
 };
-export const _deleteMany = async (req: Request, res: Response) => {
+export const _DeleteMany = async (req: Request, res: Response) => {
   try {
     const listOfID: string[] = req.body.listOfID || req.params.listOfID;
     if (listOfID) {

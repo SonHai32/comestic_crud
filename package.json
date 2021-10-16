@@ -15,6 +15,7 @@
     "@types/bcrypt": "^5.0.0",
     "@types/jsonwebtoken": "^8.5.5",
     "bcrypt": "^5.0.1",
+    "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "dot-env": "^0.0.1",
     "dotenv": "^10.0.0",
@@ -24,6 +25,7 @@
     "ts-transformer-keys": "^0.4.3"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.2",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/mongodb": "^4.0.7",

@@ -1,3 +1,4 @@
+import { TokenService } from "./token.service";
 import jwt from "jsonwebtoken";
 import { User } from "./../models/user.model";
 import { MongoClient, Collection, InsertOneResult } from "mongodb";
@@ -67,26 +68,32 @@ export default class UserService {
           bcrypt.compare(
             password,
             user.password,
-            (error: any, result: boolean) => {
+            async (error: any, result: boolean) => {
               if (error) throw error;
               if (result) {
-                const resUser = { _id: user._id, username: username , role: user.role};
-                if (process.env.JWT_SECRET_KEY) {
-                  const accessToken = jwt.sign(
-                    resUser,
-                    process.env.JWT_SECRET_KEY,
-                    {
-                      expiresIn: "5h",
-                    }
+                const resUser = {
+                  _id: user._id,
+                  username: username,
+                  role: user.role,
+                };
+                if (
+                  process.env.JWT_SECRET_KEY &&
+                  process.env.JWT_RETOKEN_SECRET_KEY
+                ) {
+                  const token = jwt.sign({user: resUser}, process.env.JWT_SECRET_KEY, {
+                    expiresIn: "20s",
+                  });
+                  const refreshToken = jwt.sign(
+                    { user: resUser },
+                    process.env.JWT_RETOKEN_SECRET_KEY,
+                    { expiresIn: "7 days" }
                   );
-                  if (accessToken) {
-                    reslove({ accessToken });
-                  } else {
-                    reject(new Error("Can not generate access token "));
-                  }
-                } else {
-                  reject(new Error("Missing jwt secret key"));
-                }
+                  TokenService.storeRefreshToken(refreshToken)
+                    .then(() => {
+                      reslove({ token, refreshToken });
+                    })
+                    .catch((error) => reject(error));
+                } else reject(new Error("Missing jwt secret key"));
               } else reject(new Error("Wrong password"));
             }
           );
@@ -96,39 +103,6 @@ export default class UserService {
       }
     }
   }
-  static login(username: string, password: string): Promise<User> {
-    return new Promise(async (reslove, reject) => {
-      try {
-        const user: User | null =
-          await this.prototype.userCollection.findOne<User>({
-            username,
-          });
-        if (user) {
-          bcrypt.compare(
-            password,
-            user.password ? user.password : "",
-            (err: any, result: any) => {
-              if (result) {
-                reslove({
-                  username,
-                  _id: user._id,
-                  email_address: user.email_address,
-                  phone_number: user.phone_number,
-                } as User);
-              } else {
-                reject(new Error("Wrong Password"));
-              }
-              if (err) {
-                reject(new Error("ERROR"));
-              }
-            }
-          );
-        } else {
-          throw new Error("User not existed");
-        }
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
+
+  
 }

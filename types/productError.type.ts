@@ -1,0 +1,18 @@
+export enum ProductError {
+  MSS_PRODUCT = "Missing product",
+  MSS_NAME = "Missing product_name",
+  MSS_BRAND = "Missing product brand",
+  MSS_CATEGORY = "Missing product_category",
+  MSS_DESCRIPTION = "Missing product_description",
+  MSS_DISPLAY_IMAGE = "Missing display image",
+  MSS_IMAGE_LIST = "Missing image list",
+  MSS_SELL_PRICE = "Missing price sell price",
+  MSS_ORIGINAL_PRICE = "Missing original price",
+  MSS_DISPLAY_PRICE = "Missing display price",
+  MSS_PROFIT = "Missing profit",
+  MSS_QUANTITY = "Missing quantity",
+  MSS_RATING = "Missing rating",
+  MSS_SLUG = "Missing slug",
+  DUPL_NAME = "Product nanme duplicated",
+  DUPL_SLUG = "Product slug duplicated",
+}
