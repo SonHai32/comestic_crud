@@ -128,7 +128,7 @@ export default class CategoryService {
   ): Promise<DeleteResult | undefined> {
     try {
       return await this.prototype.categoryCollection.deleteMany({
-        _id: { $in: listID },
+        _id: { $in: listID.map((val) => new ObjectId(val)) },
       });
     } catch (error) {
       throw error;

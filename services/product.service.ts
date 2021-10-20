@@ -146,13 +146,13 @@ export default class ProductService {
       { upsert: false }
     );
   }
-  static async DeleteProdct(productID: string): Promise<number> {
-    return (
-      await this.prototype.productCollection.deleteOne({
-        _id: new ObjectId(productID),
-      })
-    ).deletedCount;
-  }
+  // static async DeleteProdct(productID: string): Promise<number> {
+  //   return (
+  //     await this.prototype.productCollection.deleteOne({
+  //       _id: new ObjectId(productID),
+  //     })
+  //   ).deletedCount;
+  // }
   static async DeleteManyProduct(productID: string[]) {
     return await this.prototype.productCollection.deleteMany({
       _id: { $in: productID.map((val: string) => new ObjectId(val)) },

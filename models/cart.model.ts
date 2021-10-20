@@ -5,6 +5,6 @@ export interface Cart {
   product: Product;
   quantity: Int32;
   total: Double;
-  created_at: Timestamp;
+  created_at: Date;
   created_by: string;
 }

@@ -123,71 +123,14 @@ export const _Update = async (req: Request, res: Response) => {
 };
 export const _Delete = async (req: Request, res: Response) => {
   try {
-    const productID = req.query.id || req.body.id || req.params.id;
-    if (productID) {
-      const result = await ProductService.DeleteProdct(productID as string);
-      if (result) {
-        res.json({
-          status: "SUCCESS",
-          message: `Product with ID: ${productID} DELETED`,
-        });
-      } else {
-        throw new Error(`Product with ID: ${productID} FAIL TO DELETE`);
-      }
-    } else {
-      throw new Error("Require ID");
-    }
-  } catch (error) {
-    res.json({
-      status: "FAIL",
-      message: (error as Error).message,
-    });
-  }
-};
-export const _DeleteMany = async (req: Request, res: Response) => {
-  try {
-    const listOfID: string[] = req.body.listOfID || req.params.listOfID;
+    const listOfID: string[] = req.body.listOfID;
     if (listOfID) {
       const result = await ProductService.DeleteManyProduct(listOfID);
       if (result.deletedCount > 0) {
-        res.json({ status: "SUCCESS", message: "Delete Success" });
+        return res.json({ status: "SUCCESS", message: "Delete Success" });
       } else throw new Error("Delete Fail");
     } else throw new Error("Missing list product_id");
   } catch (error) {
-    res.json({ status: "FAIL", message: (error as Error).message });
+    return res.json({ status: "FAIL", message: (error as Error).message });
   }
-};
-const productValid = (product: any) => {
-  let missingValue = "";
-  const {
-    product_name,
-    product_price,
-    product_old_price,
-    product_discount,
-    product_img_urls,
-    product_cat,
-    product_amount,
-  } = product;
-  if (!product_name) {
-    missingValue += "product_name ;";
-  }
-  if (!product_price) {
-    missingValue += "product_price ;";
-  }
-  if (!product_old_price) {
-    missingValue += "product_old_price ; ";
-  }
-  if (!product_cat) {
-    missingValue += "product_cat ;";
-  }
-  if (!product_discount) {
-    missingValue += "product_discount";
-  }
-  if (!product_img_urls) {
-    missingValue += "product_image_urls";
-  }
-  if (!product_amount) {
-    missingValue += "product_amount";
-  }
-  return missingValue;
 };

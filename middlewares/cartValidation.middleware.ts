@@ -16,7 +16,6 @@ export const CartValidationMiddleware = async (
     else {
       if (!cart.product) errorList.push(CartError.MSS_PRODUCT);
       if (!cart.quantity) errorList.push(CartError.MSS_QUANTITY);
-      if (!cart.total) errorList.push(CartError.MSS_TOTAL);
     }
 
     if (errorList.length > 0) {

@@ -131,14 +131,15 @@ export const _Update = async (req: Request, res: Response) => {
 
 export const _Delete = async (req: Request, res: Response) => {
   try {
-    const listID: string[] = req.body.listID;
+    const listID: string[] = req.body.listOfID;
+    console.log(req.body)
     if (listID) {
       const result: DeleteResult | undefined =
         await CategoryService.deleteCategory(listID);
       if (result && result.deletedCount > 0)
         res.json({ status: "SUCCESS", message: "Deleted" } as ResponseType);
       else throw new Error("Delete fail");
-    }
+    } else throw new Error("No list to delete");
   } catch (error) {
     res.json({
       status: "FAIL",

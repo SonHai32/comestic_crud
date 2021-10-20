@@ -2,7 +2,6 @@ import { IsAdminMiddleware } from "./../middlewares/role.middleware";
 import {
   _Create,
   _Delete,
-  _DeleteMany,
   _Detail,
   _Get,
   _Update,
@@ -30,6 +29,6 @@ router
     ProductValidationMiddleware,
     _Update
   );
-router.route("/").put(_DeleteMany);
-router.route("/:id").put(_Delete);
+// router.route("/").put(_DeleteMany);
+router.route("/").delete(AuthorizationMiddleware, IsAdminMiddleware, _Delete);
 export default router;

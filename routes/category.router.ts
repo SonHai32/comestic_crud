@@ -23,6 +23,6 @@ router
   );
 router.route("/detail").get(_Detail);
 router.route("/").put(AuthorizationMiddleware, IsAdminMiddleware, _Update);
-router.route("/").delete(_Delete);
+router.route("/").delete(AuthorizationMiddleware, IsAdminMiddleware, _Delete);
 
 export default router;

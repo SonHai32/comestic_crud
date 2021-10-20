@@ -1,6 +1,4 @@
-import { CartResponse } from "./../models/cart-response.model";
-import { CartFilter } from "./../models/cart-filter.model";
-import { ObjectId } from "bson";
+import { Double, Int32, ObjectId } from "bson";
 import { Cart } from "./../models/cart.model";
 import {
   Collection,
@@ -26,10 +24,22 @@ export default class CartService {
     }
   }
 
-  static async insertCart(cart: Cart): Promise<InsertOneResult | undefined> {
+  static async insertCart(
+    cart: any,
+    created_by: string
+  ): Promise<InsertOneResult | undefined> {
     try {
+      const { quantity } = cart;
+      const { display_price } = cart.product;
+      const total = new Double(Math.floor(quantity * display_price));
+      const mapToCart: Cart = {
+        ...(cart as Cart),
+        created_at: new Date(),
+        created_by,
+        total,
+      };
       return await this.prototype.cartCollection.insertOne({
-        ...cart,
+        ...mapToCart,
         _id: new ObjectId(),
       });
     } catch (error) {
@@ -37,17 +47,23 @@ export default class CartService {
     }
   }
 
-  static async updateCart(
-    cartID: string,
-    cart: Cart
+  static async updateCartQuantity(
+    cart: any
   ): Promise<UpdateResult | undefined> {
     try {
+      const _id: ObjectId = cart._id ? new ObjectId(cart._id) : new ObjectId();
+      const { quantity } = cart;
+      const { display_price } = cart.product;
+      const total: Double = new Double(quantity * display_price);
+
       return await this.prototype.cartCollection.updateOne(
-        { _id: cartID },
-        { $set: cart },
+        { _id },
+        { $set: { quantity: new Int32(quantity), total } },
         { upsert: false }
       );
-    } catch (error) {}
+    } catch (error) {
+      throw error;
+    }
   }
   static async deleteCart(listID: string[]) {
     try {
@@ -55,33 +71,16 @@ export default class CartService {
       return await this.prototype.cartCollection.deleteMany({
         _id: { $in: mapListID },
       });
-    } catch (error) {}
+    } catch (error) {
+      throw error;
+    }
   }
 
-  static async getAllCart(
-    userID: string,
-    filter?: CartFilter
-  ): Promise<CartResponse> {
+  static async getAllCart(userID: string): Promise<Cart[]> {
     try {
-      let carts: Cart[] = [];
-      const cursor = this.prototype.cartCollection.find<Cart>({
-        created_by: userID,
-      });
-      if (filter) {
-        carts = await cursor.limit(filter.perPage).skip(filter.page).toArray();
-      } else carts = await cursor.sort({ created_at: "desc" }).toArray();
-      const totalResult: number =
-        await this.prototype.cartCollection.countDocuments({});
-
-      const cartResponse: CartResponse = {
-        carts,
-        page: filter && filter.page ? filter.page : 0,
-        perPage: filter && filter.perPage ? filter.perPage : 0,
-        totalResult,
-        status: carts.length > 0 ? "SUCCESS" : "FAIL",
-      };
-
-      return cartResponse;
+      return this.prototype.cartCollection
+        .find<Cart>({ created_by: userID })
+        .toArray();
     } catch (error) {
       throw error;
     }
