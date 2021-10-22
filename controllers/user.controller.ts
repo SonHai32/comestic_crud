@@ -18,12 +18,6 @@ export const _Login = async (req: Request, res: Response) => {
       password
     );
     if (accessToken) {
-      // res.cookie("token", accessToken.token, {
-      //   httpOnly: true,
-      //   secure: true,
-      //   expires: new Date(new Date().getTime() + 10 * 1000),
-      //   sameSite: "strict",
-      // });
       res.cookie("refreshToken", accessToken.refreshToken, {
         httpOnly: true,
         secure: true,
@@ -44,6 +38,15 @@ export const _Login = async (req: Request, res: Response) => {
       status: "FAIL",
       message: (error as Error).message,
     });
+  }
+};
+export const _Get = async (req: Request, res: Response) => {
+  try {
+    const accessToken = req.body.accessToken;
+    if (!accessToken) throw new Error("Missing accessToken");
+    else return res.json({ status: "SUCCESS", accessToken });
+  } catch (error) {
+    return res.json({ status: "FAIL", message: (error as Error).message });
   }
 };
 

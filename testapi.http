@@ -36,6 +36,18 @@ Content-Type: application/json
     "category": {
 
     "name": "hihi",
-    "slug": "hihi"
+    "cat_slug": "hihi"
+    }
+}
+
+
+###
+
+GET http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+    "query":{
+         "cat_slug": "dau-xa-toc"
     }
 }

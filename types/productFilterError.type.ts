@@ -1,0 +1,17 @@
+export enum ProductFilterError {
+  PAGE_NOT_NUMBER = "[filter: Page] is not type of number",
+  PAGE_LESSTHAN_0 = "[filter: Page] is less than 0",
+  PER_PAGE_NOT_NUMBER = "[filter: perPage}] is not a number",
+  PER_PAGE_LESSTHAN_0 = "[filter: perPage] is less than 0",
+  MSS_PAGE = "[filter: Page] is missing ",
+  MSS_PER_PAGE = "[filter: perPage] is missing",
+  PRICE_NOT_NUMBER = "[filter: price] is not a number",
+  PRICE_LESSTHAN_0 = "[filter: price] is less than 0",
+  PRICE_START_NOT_NUMBER = "[filter: priceStart] is not a number",
+  PRICE_START_LESSTHAN_0 = "[filter: priceStart] is less than 0",
+  PRICE_END_NOT_NUMBER = "[filter: priceEnd] is not a number",
+  PRICE_END_LESSTHAN_0 = "[filter: priceEnd] is less than 0",
+  DUPLICATED_PRICE_FILTER = "price filter is duplicated",
+  MSS_PRICE_START = "[filter: priceStart] is missing",
+  MSS_PRICE_END = "[filter: priceEnd] is missing",
+}

@@ -1,45 +1,20 @@
 import { Product } from "./../models/product.model";
-import { ProductListQuery } from "./../models/product-query.model";
 import { Request, Response } from "express";
 import ProductService from "../services/product.service";
 import { InsertOneResult } from "mongodb";
 
 export const _Get = async (req: Request, res: Response) => {
   try {
-    const query: ProductListQuery = {
-      name: req.body.name || req.query.name,
-      cat_id: req.body.cat_id || req.query.cat_id,
-      cat_name: req.body.cat_name || req.query.cat_name,
-      per_page: req.body.per_page ? parseInt(req.body.per_page as string) : 12,
-      page: req.query.page ? parseInt(req.query.page as string) : 0,
+    const query: any = req.body.query || req.query;
+    const mapQuery: any = {
+      ...query,
+      page: query.page ? parseInt(query.page) : null,
+      perPage: query.perPage ? parseInt(query.perPage) : null,
     };
-    if (req.query.price) {
-      const price = (req.query.price as string).trim();
-      if (price) {
-        const priceSplit = price.split(",").map((val) => {
-          return parseInt(val);
-        });
-        if (priceSplit.length >= 2) {
-          query.price = priceSplit.splice(0, 2);
-        } else {
-          throw new Error("price not in Array");
-        }
-      }
-    } else if (req.body.price) {
-      const price = (req.body.price as number[]).map((val) =>
-        parseInt(val.toString())
-      );
-      if (price.length >= 2) {
-        query.price = price;
-      } else {
-        throw new Error("price not in Array");
-      }
-    }
-
-    const productListResponse = await ProductService.getProduct(query);
-    if (productListResponse.product_list) {
-      res.json({ ...productListResponse, status: "SUCCESS" });
-    }
+    let result = await (mapQuery
+      ? ProductService.getProduct(mapQuery)
+      : ProductService.getProduct());
+    return res.json(result);
   } catch (error) {
     res.json({
       status: "FAIL",
@@ -47,6 +22,7 @@ export const _Get = async (req: Request, res: Response) => {
     });
   }
 };
+
 export const _Detail = async (req: Request, res: Response) => {
   if (req.query.id) {
     try {
@@ -69,6 +45,7 @@ export const _Detail = async (req: Request, res: Response) => {
     }
   }
 };
+
 export const _Create = async (req: Request, res: Response) => {
   try {
     const product: Product = req.body.product;
@@ -89,6 +66,7 @@ export const _Create = async (req: Request, res: Response) => {
     res.json({ status: "FAIL", message: (error as Error).message });
   }
 };
+
 export const _Update = async (req: Request, res: Response) => {
   try {
     const product: Product = req.body.product;
@@ -121,8 +99,10 @@ export const _Update = async (req: Request, res: Response) => {
     });
   }
 };
+
 export const _Delete = async (req: Request, res: Response) => {
   try {
+    console.log(req.body);
     const listOfID: string[] = req.body.listOfID;
     if (listOfID) {
       const result = await ProductService.DeleteManyProduct(listOfID);

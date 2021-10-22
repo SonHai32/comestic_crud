@@ -1,5 +1,5 @@
 import { ProductResponse } from "../models/product-response.model";
-import { Collection, MongoClient } from "mongodb";
+import { Collection, FindCursor, MongoClient } from "mongodb";
 import { ProductListQuery } from "../models/product-query.model";
 import { Product } from "../models/product.model";
 import { Double, Int32, ObjectId, Timestamp } from "bson";
@@ -50,44 +50,44 @@ export default class ProductService {
     });
   }
 
-  static async getProduct(query: ProductListQuery) {
-    let _query = [];
-    if (query.name) {
-      _query.push({ $text: { $search: query.name } });
-    }
-    if (query.cat_id) {
-      _query.push({
-        "product_cat.cat_id": query.cat_id,
-      });
-    }
-    if (query.price) {
-      _query.push({
-        $or: [
-          {
-            sell_price: { $gte: query.price[0], $lte: query.price[1] },
-          },
-          {
-            display_price: { $gte: query.price[0], $lte: query.price[1] },
-          },
-        ],
-      });
-    }
+  static async getProduct(query?: any) {
     try {
-      const finalQuery = _query.length > 0 ? { $and: _query } : {};
-      const cursor = this.prototype.productCollection.find(finalQuery);
-      const displayCursor = cursor
-        .limit(query.per_page)
-        .skip(query.per_page * query.page);
+      let _query = [];
 
-      const productList = (await displayCursor.toArray()) as Product[];
+      if (query) {
+        if (query.name) _query.push({ $text: { $search: query.name } });
+
+        if (query.category_slug)
+          _query.push({ "category.slug": query.category_slug });
+
+        if (query.price)
+          _query.push({ display_price: new Double(query.price) });
+
+        if (query.priceStart && query.priceEnd)
+          _query.push({
+            display_price: {
+              $gte: new Double(query.priceStart),
+              $lte: new Double(query.priceEnd),
+            },
+          });
+      }
+
+      const finalQuery = _query.length > 0 ? { $and: _query } : {};
+      const cursor = this.prototype.productCollection.find<Product>(finalQuery);
+      const displayCursor: FindCursor<Product> =
+        query?.page && query.perPage
+          ? cursor.limit(query.perPage).skip(query.page - 1) // client alway send page index filter greater than 0
+          : cursor;
+      const productList: Product[] = await displayCursor.toArray();
       const totalNumProduct =
         await this.prototype.productCollection.countDocuments(finalQuery);
 
       return {
+        status: productList ? "SUCCESS" : "FAIL",
         product_list: productList,
         total_num_product: totalNumProduct,
-        page: query.page,
-        per_page: query.per_page,
+        page: query?.page ? query.page : 0,
+        per_page: query?.perPage ? query.perPage : null,
       } as ProductResponse;
     } catch (error) {
       throw error;

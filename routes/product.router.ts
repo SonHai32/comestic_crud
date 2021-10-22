@@ -1,3 +1,4 @@
+import { ProductFilterValidationMiddleware } from "./../middlewares/productFilterValidation.middleware";
 import { IsAdminMiddleware } from "./../middlewares/role.middleware";
 import {
   _Create,
@@ -11,7 +12,7 @@ import { AuthorizationMiddleware } from "../middlewares/auth.middleware";
 import { ProductValidationMiddleware } from "../middlewares/productValidation.middleware";
 
 const router = express.Router();
-router.route("/").get(_Get);
+router.route("/").get(ProductFilterValidationMiddleware, _Get);
 router.route("/:id").get(_Detail);
 router
   .route("/")
