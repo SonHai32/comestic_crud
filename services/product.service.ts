@@ -1,6 +1,5 @@
 import { ProductResponse } from "../models/product-response.model";
 import { Collection, FindCursor, MongoClient } from "mongodb";
-import { ProductListQuery } from "../models/product-query.model";
 import { Product } from "../models/product.model";
 import { Double, Int32, ObjectId, Timestamp } from "bson";
 
@@ -85,7 +84,7 @@ export default class ProductService {
       return {
         status: productList ? "SUCCESS" : "FAIL",
         product_list: productList,
-        total_num_product: totalNumProduct,
+        total_result: totalNumProduct,
         page: query?.page ? query.page : 0,
         per_page: query?.perPage ? query.perPage : null,
       } as ProductResponse;
@@ -104,6 +103,7 @@ export default class ProductService {
       rating,
       discount,
     } = product;
+
     const productPropMaptoBson = {
       ...product,
       created_at: Timestamp.fromInt(Date.now()),
@@ -125,6 +125,7 @@ export default class ProductService {
         created_by_username: user.username,
       },
     } as Product;
+
     return await this.prototype.productCollection.insertOne({
       ...productPropMaptoBson,
       _id: new ObjectId(),

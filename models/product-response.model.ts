@@ -3,7 +3,7 @@ export interface ProductResponse {
   product_list: Product[];
   page: number;
   per_page: number;
-  total_num_product: number;
+  total_result: number;
   status: "SUCCESS" | "FAIL";
   error?: {
     message: string;
