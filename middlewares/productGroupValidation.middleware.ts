@@ -7,17 +7,25 @@ export const ProductGroupValidationMiddleWare = async (
   next: NextFunction
 ) => {
   try {
-    const productGroup: any = req.body.productGroups;
-    const errors: string[] = [];
+    const productGroup: Array<any> = req.body.listProductGroup;
+    if (!productGroup)
+      throw new Error(ProductGroupError.MSS_LIST_PRODUCT_GROUP);
+    const errors: string[] = productGroup.map((val: any, index: number) => {
+      const error: string[] = [];
+      if (!val.status) error.push(ProductGroupError.MSS_STATUS);
+      if (!val.title) error.push(ProductGroupError.MSS_TITLE);
+      if (!val.group_id) error.push(ProductGroupError.MSS_GROUP_ID);
+      if (val.available_in && !val.expires_in)
+        error.push(ProductGroupError.MSS_EXPIRES_IN);
+      if (val.expires_in && !val.available_in)
+        error.push(ProductGroupError.MSS_AVAILABLE_IN);
+      if (error.length > 0) {
+        error.unshift(`[ERROR] Product group index at ${index}`);
+      }
+      return error.join(" , ");
+    });
 
-    if (!productGroup.title) errors.push(ProductGroupError.MSS_TITLE);
-    if (!productGroup.group_id) errors.push(ProductGroupError.MSS_GROUP_ID);
-    if (productGroup.available_in && !productGroup.expires_in)
-      errors.push(ProductGroupError.MSS_EXPIRES_IN);
-    if (productGroup.expires_in && !productGroup.available_in)
-      errors.push(ProductGroupError.MSS_AVAILABLE_IN);
-
-    if (errors.length > 0) {
+    if (errors.some((val: string) => val)) {
       throw new Error(errors.join(" , "));
     } else {
       return next();

@@ -10,13 +10,9 @@ import {
 
 const router = Router();
 
-router.route("").get(AuthorizationMiddleware, _Get);
-router
-  .route("")
-  .post(AuthorizationMiddleware, ProductGroupValidationMiddleWare, _Create);
-router
-  .route("")
-  .put(AuthorizationMiddleware, ProductGroupValidationMiddleWare, _Update);
-router.route("").delete(AuthorizationMiddleware, _Delete);
+router.route("").get(_Get);
+router.route("").post(ProductGroupValidationMiddleWare, _Create);
+router.route("").put(ProductGroupValidationMiddleWare, _Update);
+router.route("").delete(_Delete);
 
 export default router;

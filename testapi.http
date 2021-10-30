@@ -51,3 +51,24 @@ Content-Type: application/json
          "cat_slug": "dau-xa-toc"
     }
 }
+###
+
+
+
+
+GET http://localhost:8080/api/product-groups
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTYzMmI3YjRlMjNkMGE4OTAwNjU0NDMiLCJ1c2VybmFtZSI6ImhhaWhpaGkiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE2MzQwMTk5MjYsImV4cCI6MTYzNDAzNzkyNn0.sHLwWFr1Sw1h9-Zw4jKVeUfwEFD9wJF17nDedBDI4k0 
+###
+POST http://localhost:8080/api/product-groups
+Content-Type: application/json
+
+{
+    "listProductGroup": [{
+        "status": true,
+        "title": "hih",
+        "group_id": "hihi",
+        "available_in": "2021-10-30T09:29:41.777+00:00",
+        "expires_in": "2021-10-30T09:29:41.777+00:00"
+    
+    }]
+}
