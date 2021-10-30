@@ -1,11 +1,12 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import productRouter from "./routes/product.router";
-import cookieParser from 'cookie-parser'
+import cookieParser from "cookie-parser";
 import catRouter from "./routes/category.router";
 import userRouter from "./routes/user.route";
 import cartRouter from "./routes/cart.router";
 import orderRouter from "./routes/order.router";
+import productGroupRouter from "./routes/productGroup.router";
 
 const app = express();
 
@@ -17,9 +18,10 @@ app.use(
 );
 
 app.use(express.json());
-app.use(cookieParser())
+app.use(cookieParser());
 app.get("/", (req, res) => res.send("Express + TypeScript Server"));
 app.use("/api/products", productRouter);
+app.use("/api/product-groups", productGroupRouter);
 app.use("/api/categories", catRouter);
 app.use("/api/users", userRouter);
 app.use("/api/carts", cartRouter);

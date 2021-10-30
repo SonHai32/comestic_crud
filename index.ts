@@ -1,3 +1,4 @@
+import { ProductGroupService } from "./services/product-group.service";
 import { MongoClient, MongoError } from "mongodb";
 import server from "./server";
 import dotenv from "dotenv";
@@ -26,6 +27,7 @@ if (process.env.CONNECT_DB_URI) {
       await CartService.injectDB(client);
       await OrderService.injectDB(client);
       await TokenService.injectDB(client);
+      await ProductGroupService.injectDB(client);
       server.listen(PORT, () => {
         console.log(`⚡️[server]: Server is running on localhost: ${PORT}`);
       });
