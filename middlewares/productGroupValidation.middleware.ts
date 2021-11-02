@@ -12,7 +12,7 @@ export const ProductGroupValidationMiddleWare = async (
       throw new Error(ProductGroupError.MSS_LIST_PRODUCT_GROUP);
     const errors: string[] = productGroup.map((val: any, index: number) => {
       const error: string[] = [];
-      if (!val.status) error.push(ProductGroupError.MSS_STATUS);
+      if (! (typeof val.status === 'boolean')) error.push(ProductGroupError.MSS_STATUS);
       if (!val.title) error.push(ProductGroupError.MSS_TITLE);
       if (!val.group_id) error.push(ProductGroupError.MSS_GROUP_ID);
       if (val.available_in && !val.expires_in)
