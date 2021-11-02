@@ -63,7 +63,7 @@ export class ProductGroupService {
         } as ProductGroup;
 
         return this.prototype.collection.updateOne(
-          { _id: val._id },
+          { _id: new ObjectId(val._id) },
           [{ $set: updateVal }, { $unset: "_id" }],
           { upsert: false }
         );
